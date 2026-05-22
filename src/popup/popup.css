@@ -1,0 +1,937 @@
+/*
+ * Theme variables. Default values are the dark palette. Light mode
+ * is opt-in via ``prefers-color-scheme: light`` so users on
+ * system-wide light themes see a friendlier popup. The accent / warn
+ * / error / good hues stay the same in both modes — only the
+ * surface, border, text colors flip — so brand recognition + status
+ * semantics carry across themes. No manual toggle in v1; the OS
+ * setting is the only switch. (Adding a manual override is one
+ * additional storage key + a class on <body>.)
+ */
+:root {
+  --bg: #0f1115;
+  --panel: #161a22;
+  --panel-elevated: #1f2630;
+  --border: #232a36;
+  --text: #e7ecf3;
+  --muted: #8a93a3;
+  --accent: #4f8cff;
+  --warn: #f5a524;
+  --error: #ef4444;
+  --good: #22c55e;
+  --pill-encrypt-bg: rgba(132, 204, 22, 0.18);
+  --pill-encrypt-fg: #a3e635;
+  --pill-encrypt-border: rgba(132, 204, 22, 0.4);
+  --toast-bg: rgba(74, 222, 128, 0.12);
+  --toast-fg: #86efac;
+  --toast-border: rgba(74, 222, 128, 0.35);
+  --focus-ring: 0 0 0 2px rgba(79, 140, 255, 0.5);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f8fb;
+    --panel: #ffffff;
+    --panel-elevated: #eef2f7;
+    --border: #d7dce4;
+    --text: #14181f;
+    --muted: #5a6473;
+    --accent: #2563eb;
+    --warn: #b45309;
+    --error: #b91c1c;
+    --good: #15803d;
+    --pill-encrypt-bg: rgba(22, 163, 74, 0.12);
+    --pill-encrypt-fg: #15803d;
+    --pill-encrypt-border: rgba(22, 163, 74, 0.3);
+    --toast-bg: rgba(34, 197, 94, 0.10);
+    --toast-fg: #15803d;
+    --toast-border: rgba(34, 197, 94, 0.30);
+    --focus-ring: 0 0 0 2px rgba(37, 99, 235, 0.45);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/*
+ * Accessibility — Phase U6 focus ring. Every interactive element
+ * (button, link, input, select, textarea) gets a visible 2-px ring
+ * on keyboard focus. ``:focus-visible`` so a mouse click doesn't
+ * keep the ring around — keyboard users get the affordance, mouse
+ * users don't get the visual noise.
+ */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 4px;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 320px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.pill {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--panel-elevated);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.pill.state-recording {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--good);
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.pill.state-starting,
+.pill.state-stopping {
+  background: rgba(79, 140, 255, 0.15);
+  color: var(--accent);
+  border-color: rgba(79, 140, 255, 0.4);
+}
+
+.pill.state-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--error);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Phase U2 — encryption indicator pill rendered next to the state
+   pill. Hidden until the active recording is encrypted; then sits
+   inline as a small lock badge. */
+.encrypt-pill {
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  background: var(--pill-encrypt-bg);
+  color: var(--pill-encrypt-fg);
+  border: 1px solid var(--pill-encrypt-border);
+}
+.encrypt-pill.hidden { display: none; }
+
+/* Phase U2 — soft hint row used for VAD stat + memory pressure. Looks
+   like a regular row but with muted styling so it doesn't compete with
+   error / warn rows. */
+.hint-row {
+  color: var(--muted, #8a93a3);
+  font-size: 12px;
+}
+.hint-row.warn { color: var(--warn, #f5a524); }
+.hint-row.error { color: var(--error, #fda4af); }
+
+/* Phase U2 — post-stop recap toast. Slides in below the queue row
+   when a recording transitions from RECORDING → IDLE so the user
+   sees a "saved" beat instead of the UI snapping back. */
+.recap-toast {
+  background: var(--toast-bg);
+  border: 1px solid var(--toast-border);
+  color: var(--toast-fg);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  transition: opacity 0.2s ease;
+}
+.recap-toast.hidden { display: none; }
+
+.pill.state-needs_reauth {
+  background: rgba(245, 165, 36, 0.15);
+  color: var(--warn);
+  border-color: rgba(245, 165, 36, 0.4);
+}
+
+main {
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.row-label {
+  color: var(--muted);
+}
+
+.row-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row.error {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.07);
+}
+
+.row.warn {
+  border-color: rgba(245, 165, 36, 0.4);
+  background: rgba(245, 165, 36, 0.07);
+  color: var(--warn);
+  display: block;
+}
+
+.row.warn a {
+  color: var(--warn);
+}
+
+.row.info {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.07);
+  align-items: center;
+}
+
+.rec-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  vertical-align: middle;
+  animation: rec-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes rec-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.hidden {
+  display: none !important;
+}
+
+button {
+  margin-top: 6px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.stop {
+  background: transparent;
+  color: var(--error);
+  border-color: var(--error);
+}
+
+a.secondary {
+  display: block;
+  text-align: center;
+  margin-top: 4px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+a.secondary:hover {
+  color: var(--text);
+}
+
+.levels {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.level-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.level-label {
+  width: 48px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.level-bar {
+  flex: 1;
+  height: 8px;
+  background: #1f2630;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.level-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  transition: width 90ms linear;
+}
+
+.level-fill.mic {
+  background: linear-gradient(90deg, #22c55e 0%, #facc15 70%, #ef4444 100%);
+}
+
+.level-fill.tab {
+  background: linear-gradient(90deg, #4f8cff 0%, #818cf8 70%, #a78bfa 100%);
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.button-group button {
+  flex: 1;
+  margin-top: 0;
+}
+
+button.secondary-btn {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+button.secondary-btn.paused {
+  color: var(--warn);
+  border-color: rgba(245, 165, 36, 0.5);
+}
+
+#caption-consent-row { flex-direction: column; align-items: stretch; gap: 8px; }
+#caption-consent-text { font-size: 12px; line-height: 1.4; }
+.caption-consent-btns { display: flex; gap: 8px; }
+.caption-consent-btns button { flex: 1; }
+button.secondary-btn.active {
+  background: var(--accent, #2d6cdf);
+  color: #fff;
+  border-color: var(--accent, #2d6cdf);
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px 12px;
+  font-size: 12px;
+}
+
+.footer-sep {
+  color: var(--muted, #999);
+}
+
+main {
+  position: relative;
+}
+
+.auth {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 8px 0;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-weight: 500;
+  margin-top: 0;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.auth-tab.active {
+  background: var(--panel);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.auth-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/*
+ * Legal footer on the signin view — CWS expects a Terms/Privacy
+ * link on any view that captures credentials for an account that
+ * records audio/video. Muted styling so it sits quietly under the
+ * primary CTAs; underline + accent on hover so the links read as
+ * actionable.
+ */
+.auth-legal {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+  margin: 4px 0 0;
+}
+
+.auth-legal a {
+  color: var(--muted);
+  text-decoration: underline;
+}
+
+.auth-legal a:hover {
+  color: var(--text);
+}
+
+.auth input[type="email"],
+.auth input[type="password"] {
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+
+.auth input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.auth-hint {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.auth-error {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: var(--error);
+  font-size: 12px;
+}
+
+.auth-submit {
+  margin-top: 10px;
+}
+
+/* "or" divider between email/password and social buttons. */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 6px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+/* Google / Microsoft buttons — neutral outline, distinct from the
+   primary email/password submit. */
+.auth-social {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: #fff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.auth-social:hover {
+  background: #f9fafb;
+}
+.auth-social:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* View tabs — Record / Bot. Same visual language as the auth tabs
+   so the popup feels consistent across the two surfaces. */
+.view-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 10px;
+}
+
+/* Phase E — always-visible dual-session strip (recording +
+   transcription can run together). */
+.sessions-strip {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+.sess-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid rgba(127, 140, 158, 0.25);
+  border-radius: 8px;
+  font-size: 11px;
+  min-width: 0;
+}
+.sess-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex: 0 0 auto;
+}
+.sess-dot.live {
+  background: #ef4444;
+  animation: sess-pulse 1.4s ease-in-out infinite;
+}
+@keyframes sess-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.sess-label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex: 0 0 auto;
+}
+.sess-state {
+  color: var(--text);
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+.sess-meta {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.view-tab {
+  flex: 1;
+  padding: 8px 0;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.view-tab.active {
+  background: var(--panel);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* Bot tab form — same input styling as the auth surface, with a
+   platform-radio fieldset that mirrors the radio styling Chrome
+   ships by default (custom theming kept light to stay legible on
+   both themes). */
+#bot-view input[type="text"],
+#bot-view input[type="url"] {
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+
+#bot-view input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.bot-platform {
+  display: flex;
+  gap: 12px;
+  border: 0;
+  padding: 0;
+  margin: 6px 0 0;
+}
+
+.bot-platform legend {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 4px;
+  width: 100%;
+}
+
+.bot-platform-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.bot-platform-option input[type="radio"] {
+  margin: 0;
+}
+
+/* --- Bot section layout fix ---------------------------------------
+   The bot form previously inherited inline-flow ``.auth-label`` +
+   un-sized inputs, so the label sat next to a narrow input and
+   wrapped (cramped, tiny). Force a clean stacked form: each label is
+   a full-width block above its input, inputs fill the panel, and the
+   font is bumped for readability. */
+#bot-view .auth-label {
+  display: block;
+  width: 100%;
+  font-size: 13px;
+  margin: 12px 0 4px;
+}
+#bot-view input[type="text"],
+#bot-view input[type="url"] {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+  padding: 9px 11px;
+}
+#bot-view .bot-platform { flex-wrap: wrap; gap: 10px 14px; }
+#bot-view .bot-platform-option { font-size: 13px; }
+#bot-view .hint { font-size: 12px; line-height: 1.45; }
+
+/* Generic labelled field (Record → meeting name). Same stacked look
+   as the fixed bot form so the popup feels consistent. */
+.field-label {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 2px 0 4px;
+}
+.field-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+}
+.field-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.auth-user-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.auth-user-row .user-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.auth-user-row .signout {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  padding: 2px 6px;
+  font-size: 11px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.auth-user-row .signout:hover {
+  color: var(--text);
+}
+
+/* ---- Phase L4 — important points ----------------------------------- */
+
+.important-points {
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.important-points-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.important-points-title {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.important-points-count {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.important-points-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.important-point {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.important-point-type {
+  flex-shrink: 0;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+/* One distinct colour per point type so a skim reveals the mix at
+   a glance. Subtle backgrounds — the popup is small + dense, full
+   chips would overwhelm. */
+.important-point-type.action_item {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+.important-point-type.decision {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+}
+.important-point-type.question {
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+}
+.important-point-type.key_takeaway {
+  background: rgba(14, 165, 233, 0.18);
+  color: #7dd3fc;
+}
+
+.important-point-text {
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.important-point-speaker {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 1px;
+}
+
+/*
+ * Subscription gate — visual state applied to any control whose
+ * backend ``*_enabled`` flag is false. The CSS class is the single
+ * affordance: popup.js iterates a registry and toggles
+ * ``.feature-disabled`` per surface. No per-feature styling, so a
+ * new flag = a new registry row in popup.js with no CSS change.
+ *
+ * We don't use the native ``disabled`` attribute because the click
+ * still needs to fire (it opens the upgrade modal). The visual lock
+ * + ``aria-disabled`` keeps users informed; the click handler is
+ * intercepted in JS.
+ */
+.feature-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+/* Tabs that are gated get a subtle lock glyph in the corner. */
+.view-tab.feature-disabled::after {
+  content: "🔒";
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 9px;
+  opacity: 0.8;
+}
+
+/* Primary action buttons get a small lock prefix in their label
+   (added via JS as data-attribute? Keep it CSS-only and visual). */
+button.feature-disabled {
+  background: var(--panel-elevated);
+  color: var(--muted);
+  border-color: var(--border);
+}
+
+/*
+ * Upgrade modal — shown when a user clicks a gated feature.
+ * Position-fixed full-popup overlay so it sits above every tab
+ * regardless of which view is open. Centred card with a soft
+ * backdrop; close on backdrop click or × button.
+ */
+.upgrade-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.upgrade-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.upgrade-modal-card {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 16px 14px;
+  width: 100%;
+  max-width: 280px;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.upgrade-modal-icon {
+  font-size: 22px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.upgrade-modal-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.upgrade-modal-message {
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.upgrade-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+button.upgrade-modal-cta {
+  margin-top: 0;
+}
+
+button.upgrade-modal-support {
+  margin-top: 0;
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.upgrade-modal-close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  margin: 0;
+  padding: 2px 8px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.upgrade-modal-close:hover {
+  color: var(--text);
+}

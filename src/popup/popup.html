@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MeetMinutes</title>
+    <link rel="stylesheet" href="./popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>MeetMinutes</h1>
+      <span id="state-pill" class="pill state-idle hidden" role="status" aria-live="polite" aria-label="Recording state">Idle</span>
+      <!-- Phase U2 — encryption indicator. Shown next to the state
+           pill when the current recording is encrypted client-side
+           (E2EE flag was on at session start). Hidden otherwise. -->
+      <span id="encrypt-indicator" class="encrypt-pill hidden" role="status" aria-label="Recording is encrypted on this device" title="This recording is encrypted on your device">🔒</span>
+    </header>
+
+    <!-- Signed-out view: shown when chrome.storage has no AUTH_TOKEN.
+         The recording <main> below is hidden in this state.
+
+         Signin only — signup lives on https://app.meetminutes.in/signup
+         and is reached via the "Sign up" link at the bottom of this
+         section, which opens a new browser tab so the user finishes
+         account creation on the web app and comes back to sign in
+         here. -->
+    <section id="auth-view" class="auth hidden">
+      <h2 class="auth-title">Sign in to MeetMinutes</h2>
+
+      <label for="auth-email" class="auth-label">Email</label>
+      <input id="auth-email" type="email" autocomplete="email" placeholder="you@example.com" />
+
+      <label for="auth-password" class="auth-label">Password</label>
+      <input id="auth-password" type="password" autocomplete="current-password" placeholder="••••••••••" />
+
+      <div id="auth-error" class="auth-error hidden"></div>
+
+      <button id="auth-submit" type="button" class="auth-submit">Sign in</button>
+
+      <div class="auth-divider"><span>or</span></div>
+
+      <button id="auth-google" type="button" class="auth-social">Continue with Google</button>
+      <button id="auth-microsoft" type="button" class="auth-social">Continue with Microsoft</button>
+
+      <p class="auth-secondary">
+        Don't have an account?
+        <button id="auth-signup-redirect" type="button" class="link-button">Sign up</button>
+      </p>
+
+      <!--
+        CWS-required legal footer on any view that captures account
+        credentials for a service that records audio/video. Links open
+        in a new browser tab (chrome.tabs.create — popup auto-closes
+        on focus loss). Plain anchors with target="_blank" so they
+        work even if the runtime listener doesn't attach in time.
+      -->
+      <p class="auth-legal">
+        By signing in you agree to our
+        <a id="auth-terms-link" href="https://www.meetminutes.in/terms"
+           target="_blank" rel="noopener noreferrer">Terms</a>
+        and
+        <a id="auth-privacy-link" href="https://www.meetminutes.in/privacy-policy"
+           target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+      </p>
+    </section>
+
+    <main id="main-view" class="hidden">
+      <div id="auth-user-row" class="auth-user-row hidden">
+        <span class="user-email" id="user-email">—</span>
+        <button type="button" id="signout-btn" class="signout">Sign out</button>
+      </div>
+
+      <!-- Tab navigation: Record (default) vs Bot. Mutually exclusive
+           views — clicking a tab swaps which section is visible. The
+           recording + live-transcribe surface lives under Record;
+           the bot dispatch form lives under Bot. -->
+      <div class="view-tabs" role="tablist">
+        <button id="tab-record" type="button" class="view-tab active"
+                role="tab" aria-selected="true" aria-controls="record-view">Record</button>
+        <button id="tab-bot" type="button" class="view-tab"
+                role="tab" aria-selected="false" aria-controls="bot-view">Bot</button>
+        <button id="tab-transcribe" type="button" class="view-tab"
+                role="tab" aria-selected="false" aria-controls="transcribe-view">Transcribe</button>
+      </div>
+
+      <!-- Phase E — recording and live-transcription can now run at
+           the same time, so a single visible tab is no longer enough.
+           This always-visible strip surfaces BOTH sessions' status +
+           activity regardless of which tab is selected. -->
+      <div id="sessions-strip" class="sessions-strip" role="status" aria-live="polite">
+        <div class="sess-card" id="sess-rec-card">
+          <span class="sess-dot" id="sess-rec-dot" aria-hidden="true"></span>
+          <span class="sess-label">Recording</span>
+          <span class="sess-state" id="sess-rec-state">Idle</span>
+          <span class="sess-meta" id="sess-rec-meta"></span>
+        </div>
+        <div class="sess-card" id="sess-tr-card">
+          <span class="sess-dot" id="sess-tr-dot" aria-hidden="true"></span>
+          <span class="sess-label">Transcription</span>
+          <span class="sess-state" id="sess-tr-state">Idle</span>
+          <span class="sess-meta" id="sess-tr-meta"></span>
+        </div>
+      </div>
+
+      <section id="record-view" class="view-section" role="tabpanel" aria-labelledby="tab-record">
+
+      <!-- Shown while a recording is running in its own detached
+           control window. The toolbar popup deliberately carries no
+           session data so it stays out of the way; this slim row is
+           the safety affordance back to the live controls. -->
+      <div id="control-active-row" class="row info hidden" role="status" aria-live="polite">
+        <div class="row-label"><span class="rec-dot" aria-hidden="true"></span><span id="control-active-label">Recording</span></div>
+        <button type="button" id="open-controls" class="secondary">Open controls</button>
+      </div>
+
+      <!-- Optional meeting name. If left blank, the recording is saved
+           as "Meeting at <date> IST" (filled in by popup.js at Start). -->
+      <label for="meeting-name" class="field-label">Meeting name (optional)</label>
+      <input id="meeting-name" class="field-input" type="text" autocomplete="off"
+             maxlength="512" placeholder="Meeting at … (auto)" />
+
+      <div class="row">
+        <div class="row-label">Meeting</div>
+        <div id="meeting-source" class="row-value">—</div>
+      </div>
+
+      <div class="row">
+        <div class="row-label">Elapsed</div>
+        <div id="elapsed" class="row-value">00:00</div>
+      </div>
+
+      <div class="row">
+        <div class="row-label">Speaker</div>
+        <div id="current-speaker" class="row-value">—</div>
+      </div>
+
+      <div class="row">
+        <div class="row-label">Mic</div>
+        <div id="mic-status" class="row-value">—</div>
+      </div>
+
+      <div id="levels-wrap" class="levels hidden">
+        <div class="level-row">
+          <span class="level-label">Mic</span>
+          <div class="level-bar"><div id="level-mic-fill" class="level-fill mic"></div></div>
+        </div>
+        <div class="level-row">
+          <span class="level-label">System</span>
+          <div class="level-bar"><div id="level-tab-fill" class="level-fill tab"></div></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row-label">Chunks</div>
+        <div id="queue-depth" class="row-value" title="Recorded chunks · pending uploads">0</div>
+      </div>
+
+      <!-- Phase U2 — memory pressure indicator. Hidden under 100 MB
+           (the heap watchdog's first watermark). Renders a soft
+           warning above 200, harder warning above 300. -->
+      <div id="heap-row" class="row hint-row hidden">
+        <div class="row-label">Memory</div>
+        <div id="heap-value" class="row-value">—</div>
+      </div>
+
+      <!-- Phase U2 — post-stop recap. Shown briefly when a recording
+           ends so the user gets a clear "this is saved" beat instead
+           of the UI silently snapping back to idle. -->
+      <div id="recap-toast" class="recap-toast hidden" role="status" aria-live="polite">
+        <div id="recap-message">Saved.</div>
+      </div>
+
+      <div id="error-row" class="row error hidden" role="alert" aria-live="assertive">
+        <div class="row-label">Error</div>
+        <div id="error-message" class="row-value">—</div>
+      </div>
+
+      <div id="reauth-row" class="row warn hidden" role="alert" aria-live="assertive">
+        Session expired.
+        <a href="#" id="reauth-link">Sign in again</a>
+        to resume uploads.
+      </div>
+
+      <div id="monitor-blocked-row" class="row warn hidden" role="status" aria-live="polite">
+        Meeting audio is muted in the source tab.
+        <a href="#" id="restore-monitor">Restore</a>
+      </div>
+
+      <div id="queue-warn-row" class="row warn hidden" role="status" aria-live="polite">
+        <span id="queue-warn-text">Network slow — chunks queueing up.</span>
+      </div>
+
+      <div id="cap-remaining-row" class="row info hidden" role="status" aria-live="polite">
+        <div class="row-label">Time left</div>
+        <div id="cap-remaining-value" class="row-value">—</div>
+      </div>
+
+      <div id="cap-warning-row" class="row warn hidden" role="alert" aria-live="assertive">
+        <span id="cap-warning-text">Recording will auto-stop soon.</span>
+      </div>
+
+      <div id="cap-exceeded-row" class="row warn hidden" role="alert" aria-live="assertive">
+        <span id="cap-exceeded-text">
+          Recording reached its 3-hour limit and was stopped automatically.
+          The audio so far is being uploaded and finalized.
+        </span>
+      </div>
+
+      <div id="caption-consent-row" class="row info hidden" role="group" aria-label="Caption visibility">
+        <div id="caption-consent-text">
+          Captions must stay <strong>on</strong> to record speaker names
+          for this meeting. Do you want to see the captions?
+        </div>
+        <div class="caption-consent-btns">
+          <button id="caption-show-btn" type="button" class="secondary-btn">Show captions</button>
+          <button id="caption-hide-btn" type="button" class="secondary-btn">Hide captions</button>
+        </div>
+      </div>
+
+      <div id="busy-row" class="row warn hidden">
+        Recording is active in another tab.
+        <a href="#" id="switch-tab">Switch to it</a>
+      </div>
+
+      <div class="button-group">
+        <button id="primary-btn" type="button">Start recording</button>
+        <button id="pause-btn" type="button" class="secondary-btn hidden">Pause</button>
+      </div>
+
+      </section><!-- /record-view -->
+
+      <!-- Transcribe is now its OWN top-level section (own tab), not
+           nested under Record. Still mutually exclusive with recording
+           at the SW level (one media pipeline at a time, MV3). -->
+      <section id="transcribe-view" class="view-section hidden" role="tabpanel" aria-labelledby="tab-transcribe">
+      <section class="transcribe-panel">
+        <div class="transcribe-header">
+          <span class="transcribe-title">Live transcription</span>
+          <span id="transcribe-status" class="pill state-idle">Idle</span>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Mode</div>
+          <select id="transcribe-mode" class="row-select">
+            <option value="self">My mic (Mode 1)</option>
+            <option value="participants">Meeting audio (Mode 2)</option>
+            <option value="both">You + others (Mode 3)</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Language</div>
+          <select id="transcribe-language" class="row-select">
+            <!-- 'auto' only works on language-detecting providers
+                 (Soniox/Sarvam/Chirp). Deploys configured with
+                 Deepgram/AssemblyAI 422 on auto, so an explicit
+                 language is the safe default; auto stays selectable. -->
+            <option value="auto">Auto-detect</option>
+            <option value="en" selected>English</option>
+            <option value="hi">Hindi (Devanagari)</option>
+            <option value="hi-IN">Hindi (hi-IN)</option>
+          </select>
+        </div>
+
+        <!-- Phase U2 — VAD savings stat. Only shown while transcribing
+             and at least one ``vad_stats`` event has landed; renders
+             as "Voice activity · 38% silence skipped" so users see
+             the cost-reduction lever from Phase C. -->
+        <div id="transcribe-vad-row" class="row hint-row hidden">
+          <div class="row-label">Voice activity</div>
+          <div id="transcribe-vad-value" class="row-value">—</div>
+        </div>
+
+        <div id="transcribe-error-row" class="row error hidden" role="alert" aria-live="assertive">
+          <div class="row-label">Error</div>
+          <div id="transcribe-error-message" class="row-value">—</div>
+        </div>
+
+        <!-- Phase L4 — important points extracted by Gemini every 30s
+             from the live transcript. Renders type-grouped lists
+             (Action items / Decisions / Questions / Key takeaways).
+             Hidden when no points exist yet. -->
+        <div id="important-points-section" class="important-points hidden" role="region" aria-label="Important points from this meeting">
+          <div class="important-points-header">
+            <span class="important-points-title">Important points</span>
+            <span id="important-points-count" class="important-points-count">0</span>
+          </div>
+          <div id="important-points-list" class="important-points-list"></div>
+        </div>
+
+        <div class="button-group">
+          <button id="transcribe-btn" type="button">Start transcription</button>
+          <button id="transcribe-pause-btn" type="button" class="secondary-btn hidden">Pause</button>
+        </div>
+        <small class="hint">
+          The floating overlay appears in your active Meet / Teams tab.
+          Pause keeps the session warm so resume is instant.
+        </small>
+      </section>
+
+      </section><!-- /transcribe-view -->
+
+      <!-- Bot tab — dispatch a Playwright-based meeting bot to join a
+           Google Meet / MS Teams call. The user's local browser is
+           uninvolved after submit; the bot runs server-side and the
+           result lands in the user's library like any other recording. -->
+      <section id="bot-view" class="view-section hidden" role="tabpanel" aria-labelledby="tab-bot">
+        <small class="hint">
+          Send a bot to join a meeting for you. The recording will
+          appear in your library once the meeting ends.
+        </small>
+
+        <label for="bot-name" class="auth-label">Meeting name</label>
+        <input id="bot-name" type="text" autocomplete="off"
+               placeholder="Q3 planning sync" maxlength="512" />
+
+        <label for="bot-url" class="auth-label">Meeting URL</label>
+        <input id="bot-url" type="url" autocomplete="off"
+               placeholder="https://meet.google.com/abc-defg-hij"
+               maxlength="2048" />
+
+        <fieldset class="bot-platform" aria-label="Meeting platform">
+          <legend class="auth-label">Platform</legend>
+          <label class="bot-platform-option">
+            <input type="radio" name="bot-platform" value="google_meet" checked />
+            Google Meet
+          </label>
+          <label class="bot-platform-option">
+            <input type="radio" name="bot-platform" value="ms_teams" />
+            Microsoft Teams
+          </label>
+          <label class="bot-platform-option">
+            <input type="radio" name="bot-platform" value="zoom" />
+            Zoom
+          </label>
+        </fieldset>
+
+        <div id="bot-error" class="auth-error hidden" role="alert"></div>
+        <div id="bot-success" class="row hint-row hidden" role="status" aria-live="polite">
+          Bot dispatched. It will join the meeting shortly.
+        </div>
+
+        <div class="button-group">
+          <button id="bot-submit" type="button">Add bot to meeting</button>
+        </div>
+      </section><!-- /bot-view -->
+
+      <div class="footer-links">
+        <a href="#" id="open-options-link" class="secondary">Options</a>
+        <span class="footer-sep">·</span>
+        <a id="report-problem-link" class="secondary"
+           href="mailto:support@meetminutes.in?subject=MeetMinutes%20%E2%80%94%20Report%20a%20problem">Report a problem</a>
+      </div>
+
+      <!--
+        Subscription upgrade modal. Shown when the user clicks any
+        feature that the backend's external_platform flags report as
+        disabled for their plan (recording / live transcription / bot).
+
+        The title swaps to "Recording", "Live transcription", "Add bot
+        to meeting" based on which feature was clicked — the markup
+        stays neutral so a single modal serves every gated control.
+        Upgrade Plan → opens PRICING_PAGE_URL in a new tab via
+        chrome.tabs.create; Contact Support → opens SUPPORT_PAGE_URL
+        (the in-app "Report a problem" footer link still uses the
+        support mailto address, independent of this modal).
+      -->
+      <div id="upgrade-modal" class="upgrade-modal hidden" role="dialog"
+           aria-modal="true" aria-labelledby="upgrade-modal-title"
+           aria-describedby="upgrade-modal-message">
+        <div class="upgrade-modal-backdrop" id="upgrade-modal-backdrop"></div>
+        <div class="upgrade-modal-card">
+          <button id="upgrade-modal-close" type="button"
+                  class="upgrade-modal-close" aria-label="Close">×</button>
+          <div class="upgrade-modal-icon" aria-hidden="true">✦</div>
+          <h2 id="upgrade-modal-title" class="upgrade-modal-title">
+            Premium feature
+          </h2>
+          <p id="upgrade-modal-message" class="upgrade-modal-message">
+            This feature is not included in your current subscription plan.
+          </p>
+          <div class="upgrade-modal-actions">
+            <button id="upgrade-modal-cta" type="button"
+                    class="upgrade-modal-cta">Upgrade Plan</button>
+            <button id="upgrade-modal-support" type="button"
+                    class="upgrade-modal-support">Contact Support</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="./popup.js"></script>
+  </body>
+</html>

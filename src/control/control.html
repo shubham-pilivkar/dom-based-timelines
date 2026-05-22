@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MeetMinutes</title>
+    <link rel="stylesheet" href="./control.css" />
+  </head>
+  <body>
+    <main class="pill" id="pill">
+      <span id="dot" class="dot" aria-hidden="true"></span>
+      <span id="meeting-name" class="meeting-name" title="Meeting name"></span>
+      <span id="elapsed" class="elapsed" role="timer" aria-live="off">00:00</span>
+      <span id="current-speaker" class="speaker" aria-live="polite" title="Current speaker">—</span>
+
+      <div class="meters" aria-label="Audio levels" title="System / Mic level">
+        <div class="meter"><div id="level-tab-fill" class="fill tab"></div></div>
+        <div class="meter"><div id="level-mic-fill" class="fill mic"></div></div>
+      </div>
+
+      <span id="chunks" class="chunks" title="Chunks uploaded / recorded">↑0/0</span>
+
+      <button id="pause" type="button" class="ic" aria-label="Pause" title="Pause">
+        <span class="i-pause"></span>
+      </button>
+      <button id="stop" type="button" class="ic stop" aria-label="Stop recording" title="Stop">
+        <span class="i-stop"></span>
+      </button>
+    </main>
+    <script type="module" src="./control.js"></script>
+  </body>
+</html>

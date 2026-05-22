@@ -1,0 +1,22 @@
+{
+  "url": "https://meet.google.com/adf-iswo-auv",
+  "title": "Meet",
+  "bodyText": "Sign in Getting ready... You'll be able to join in just a moment By joining, you agree to the Terms of Service and Privacy Policy. System info will be sent to confirm you're not a bot.",
+  "inputs": [
+    {
+      "aria": "Your name",
+      "ph": "Your name"
+    }
+  ],
+  "buttons": [
+    "Sign in",
+    "visual_effectsBackgrounds and effects",
+    "Use Gemini to take notes Share notes and transcript",
+    "Start",
+    "Ask to join",
+    "meeting_roomAsk to use Companion mode",
+    "present_to_allPresent",
+    "castCast this meeting",
+    "Show fewer optionsexpand_less"
+  ]
+}

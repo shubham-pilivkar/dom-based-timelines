@@ -1,0 +1,35 @@
+{
+  "m1": {
+    "matched": true,
+    "narrow": {
+      "aria": "Selected microphone: Fake Default Audio Input, open microphone options",
+      "title": "Fake Default Audio Input",
+      "tid": "selected-microphone-display",
+      "ap": null,
+      "ac": null,
+      "html": "<button type=\"button\" aria-label=\"Selected microphone: Fake Default Audio Input, open microphone options\" title=\"Fake Default Audio Input\" class=\"fui-Button r1f29ykk fui-MenuButton ___885k3q0 f1c21dwh f1p3nwhy f11589ue f1q5o8ev f1pdflbu fkfq4zb fjxutwb f1s2uweq fr80ssc f1ukrpxl fecsdlb f139oj5f ft1hn21 fuxngvv fkoldzo fhvnf4x fb6swo4 f1klyf7k f232fm2 f1l983o9 f1nhwcv0 f1gm6xmp fxoo9op f1v3eptx f1i0gk12 fd4bjan fy77jfu f1ujusj6 f1l02sjl f1a3p1vp fbhxue7 f1o700av\" data-tid=\"selected-microphone-display\" role=\"button\" tabindex=\"0\" data-tabster=\"{&quot;restorer&quot;:{&quot;type&quot;:1},&quot;observed&quot;:{&quot;names&quot;:[&quot;calling-audio-flyout-trigger&quot;]}}\" aria-expanded=\"false\"><s"
+    },
+    "wide": [
+      {
+        "aria": null,
+        "title": "Mute mic",
+        "tid": null,
+        "ap": null,
+        "ac": null,
+        "html": "<button type=\"button\" class=\"fui-Button r1f29ykk ___x8v79x0 f1c21dwh f1p3nwhy f11589ue f1q5o8ev f1pdflbu fkfq4zb fjxutwb f1s2uweq fr80ssc f1ukrpxl fecsdlb f139oj5f ft1hn21 fuxngvv fkoldzo fhvnf4x fb6swo4 f1klyf7k f232fm2 f1l983o9 f1nhwcv0 f1gm6xmp fxoo9op f1v3eptx f1i0gk12 fd4bjan ff9fk16 fhoyzc9 ft85np5 fod5ikn fl43uef faaz57k f1b6alqh f10jubyq fqzjaix\" title=\"Mute mic\" tabindex=\"-1\" aria-hidden=\"true\" data-track-action-gesture=\"click\" data-track-action-scenario=\"preJoinMute\" data-track-module-"
+      },
+      {
+        "aria": "Selected microphone: Fake Default Audio Input, open microphone options",
+        "title": "Fake Default Audio Input",
+        "tid": "selected-microphone-display",
+        "ap": null,
+        "ac": null,
+        "html": "<button type=\"button\" aria-label=\"Selected microphone: Fake Default Audio Input, open microphone options\" title=\"Fake Default Audio Input\" class=\"fui-Button r1f29ykk fui-MenuButton ___885k3q0 f1c21dwh f1p3nwhy f11589ue f1q5o8ev f1pdflbu fkfq4zb fjxutwb f1s2uweq fr80ssc f1ukrpxl fecsdlb f139oj5f ft1hn21 fuxngvv fkoldzo fhvnf4x fb6swo4 f1klyf7k f232fm2 f1l983o9 f1nhwcv0 f1gm6xmp fxoo9op f1v3eptx f1i0gk12 fd4bjan fy77jfu f1ujusj6 f1l02sjl f1a3p1vp fbhxue7 f1o700av\" data-tid=\"selected-microphone-dis"
+      }
+    ]
+  },
+  "d1": {
+    "result": false,
+    "why": "standalone Mute/title affordance"
+  }
+}

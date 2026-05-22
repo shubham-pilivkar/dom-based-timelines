@@ -1,0 +1,38 @@
+{
+  "inputs": [
+    {
+      "aria": null,
+      "ph": "Type your name",
+      "tid": "prejoin-display-name-input"
+    },
+    {
+      "aria": null,
+      "ph": "",
+      "tid": "toggle-video"
+    },
+    {
+      "aria": "Computer audio",
+      "ph": "",
+      "tid": null
+    },
+    {
+      "aria": null,
+      "ph": "",
+      "tid": "toggle-mute"
+    },
+    {
+      "aria": "Don't use audio",
+      "ph": "",
+      "tid": null
+    }
+  ],
+  "buttons": [
+    "Open video options",
+    "Background filters",
+    "Fake Default Audio Input",
+    "Fake Default Audio Output",
+    "Cancel",
+    "Join now",
+    "Sign in"
+  ]
+}

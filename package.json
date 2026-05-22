@@ -1,0 +1,30 @@
+{
+  "name": "dom-based-speaker-timelines",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MeetMinutes Chrome Extension — record Google Meet and Microsoft Teams sessions and stream chunks plus speaker timeline to the MeetMinutes backend.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check:static": "node tests/integration/check-static.mjs",
+    "build:verify": "vite build && node tests/integration/check-static.mjs",
+    "bundle:cs": "node scripts/bundle-content-scripts.mjs",
+    "sync:ext": "node scripts/sync-ext.mjs",
+    "build:ext": "vite build && node tests/integration/check-static.mjs && node scripts/bundle-content-scripts.mjs && node scripts/sync-ext.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:install": "playwright install chromium",
+    "icons": "node scripts/generate-icons.js"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.25",
+    "@playwright/test": "^1.48.0",
+    "fake-indexeddb": "^6.0.0",
+    "happy-dom": "^15.7.4",
+    "pngjs": "^7.0.0",
+    "vite": "^5.4.6",
+    "vitest": "^2.1.0"
+  }
+}

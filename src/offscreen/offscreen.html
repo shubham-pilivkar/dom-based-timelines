@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MeetMinutes Offscreen</title>
+  </head>
+  <body>
+    <!--
+      The offscreen document is invisible to the user. It owns the
+      MediaRecorder + AudioContext and a hidden <audio> monitor so the
+      captured tab audio is re-emitted to the user (chrome.tabCapture
+      mutes the source tab by default).
+    -->
+    <audio id="tab-monitor" autoplay></audio>
+    <!--
+      Separate monitor for LIVE TRANSCRIPTION's tab capture (modes
+      "participants" / "you+others"). chrome.tabCapture mutes the
+      source tab by default; without re-emitting the captured stream
+      the user hears silence in the meeting. Kept distinct from the
+      recording monitor above so the two features can run at the same
+      time (Phase E) without fighting over one element / srcObject.
+    -->
+    <audio id="transcribe-tab-monitor" autoplay></audio>
+    <!--
+      Two modules co-exist in this single offscreen document because
+      Chrome MV3 only allows one offscreen doc per extension. The
+      service worker enforces mutual exclusion between recording and
+      live-transcription so the two never compete for media inside
+      this context.
+    -->
+    <script type="module" src="./offscreen.js"></script>
+    <script type="module" src="./transcribe.js"></script>
+  </body>
+</html>

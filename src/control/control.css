@@ -1,0 +1,164 @@
+:root {
+  --pill: #1b1f24;
+  --pill-border: #2c333d;
+  --text: #f3f5f7;
+  --muted: #8b949e;
+  --rec: #ef4444;
+  --green: #22c55e;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font: 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+}
+
+/* Single dark rounded pill — mirrors the in-page recording banner. */
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 0 14px;
+  background: var(--pill);
+  border: 1px solid var(--pill-border);
+  border-radius: 14px;
+  color: var(--text);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--rec);
+  flex: none;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.dot.paused { background: #facc15; animation: none; }
+.dot.idle { background: var(--muted); animation: none; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.elapsed {
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  min-width: 58px;
+}
+
+.meeting-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 0 1 auto;
+}
+.meeting-name:empty { display: none; }
+
+.speaker {
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 0 1 auto;
+}
+
+/* Two slim stacked level bars: system (top) + mic (bottom). */
+.meters {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 90px;
+}
+
+.meter {
+  height: 5px;
+  background: #11151a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  transition: width 90ms linear;
+}
+
+.fill.tab { background: linear-gradient(90deg, #4f8cff, #818cf8 70%, #a78bfa); }
+.fill.mic { background: linear-gradient(90deg, #22c55e, #facc15 70%, #ef4444); }
+
+.chunks {
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  flex: none;
+}
+
+.ic {
+  flex: none;
+  width: 34px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pill-border);
+  border-radius: 8px;
+  background: #262c34;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ic:hover:not(:disabled) { background: #313844; }
+.ic:disabled { opacity: 0.45; cursor: default; }
+
+.i-pause {
+  width: 10px;
+  height: 12px;
+  border-left: 3px solid var(--text);
+  border-right: 3px solid var(--text);
+}
+
+/* When paused, the pause button shows a play triangle (resume). */
+.ic.resume .i-pause {
+  width: 0;
+  height: 0;
+  border: 0;
+  border-left: 11px solid var(--text);
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  margin-left: 3px;
+}
+
+.ic.stop {
+  background: var(--rec);
+  border-color: var(--rec);
+  width: 38px;
+}
+
+.ic.stop:hover:not(:disabled) { background: #dc2626; }
+
+.i-stop {
+  width: 11px;
+  height: 11px;
+  background: #fff;
+  border-radius: 2px;
+}

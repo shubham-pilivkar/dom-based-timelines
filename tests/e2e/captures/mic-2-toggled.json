@@ -1,0 +1,36 @@
+{
+  "micToggled": {
+    "narrowMatched": true,
+    "narrow": {
+      "aria": "Turn off microphone",
+      "tooltip": null,
+      "dataIsMuted": "false",
+      "ariaPressed": null,
+      "html": "<button class=\"VYBDae-Bz112c-LgbsSe VYBDae-Bz112c-LgbsSe-OWXEXe-SfQLQb-suEOdc hk9qKe L5pwxb aLTxue hR4sgf\" jscontroller=\"PIVayb\" jsaction=\"click:h5M12e;clickmod:h5M12e;pointerdown:FEiYhc;pointerup:mF5Elf;pointerenter:EX0mI;pointerleave:vpvbp;pointercancel:xyn4sd;contextmenu:xexox;focus:h06R8; blur:zjh6rb;mlnRJb:fLiPzd;\" data-idom-class=\"hk9qKe L5pwxb aLTxue hR4sgf \" jsname=\"hw0c9\" aria-label=\"Turn off microphone\" data-tooltip-enabled=\"true\" data-tooltip-id=\"tt-c48\" data-tooltip-x-position=\"3\" data-tooltip-y-position=\"2\" data-tooltip-classes=\"PJU52b \" role=\"button\" data-is-muted=\"false\" data-promo-anchor-id=\"aSBQL\"><span class=\"XjoK4b VYBDae-Bz112c-UHGRz\"></span><span class=\"UTNHae\" jscontroller=\"LBaJxb\" jsname=\"m9ZlFb\" jsaction=\"QBlI0e:u4uo5d;BTifte:aV6zj;nqgE9d:f6959e;fHTtBd:ynrQde\"></spa"
+    },
+    "wide": [
+      {
+        "aria": "Turn off microphone",
+        "tooltip": null,
+        "dataIsMuted": "false",
+        "ariaPressed": null,
+        "role": "button",
+        "cls": "VYBDae-Bz112c-LgbsSe VYBDae-Bz112c-LgbsSe-OWXEXe-SfQLQb-suEOdc hk9qKe L5pwxb aLTxue hR4sgf",
+        "html": "<button class=\"VYBDae-Bz112c-LgbsSe VYBDae-Bz112c-LgbsSe-OWXEXe-SfQLQb-suEOdc hk9qKe L5pwxb aLTxue hR4sgf\" jscontroller=\"PIVayb\" jsaction=\"click:h5M12e;clickmod:h5M12e;pointerdown:FEiYhc;pointerup:mF5Elf;pointerenter:EX0mI;pointerleave:vpvbp;pointercancel:xyn4sd;contextmenu:xexox;focus:h06R8; blur:zjh6rb;mlnRJb:fLiPzd;\" data-idom-class=\"hk9qKe L5pwxb aLTxue hR4sgf \" jsname=\"hw0c9\" aria-label=\"Turn off microphone\" data-tooltip-enabled=\"true\" data-tooltip-id=\"tt-c48\" data-tooltip-x-position=\"3\" data-tooltip-y-position=\"2\" data-tooltip-classes=\"PJU52b \" role=\"button\" data-is-muted=\"false\" data-pr"
+      },
+      {
+        "aria": "Microphone: Fake Default Audio Input",
+        "tooltip": null,
+        "dataIsMuted": null,
+        "ariaPressed": null,
+        "role": null,
+        "cls": "vNWS4-LgbsSe vNWS4-LgbsSe-OWXEXe-Bz112c-j4gsHd vNWS4-LgbsSe-OWXEXe-Bz112c-M1Soyc vNWS4-LgbsSe-OWXEXe-Bz112c-j4gsHd-J42Xof-M1Soyc vNWS4-LgbsSe-OWXEXe-SfQLQb-suEOdc vNWS4-LgbsSe-OWXEXe-dgl2Hf vNWS4-LgbsSe-OWXEXe-zcdHbf XpeoU lQq6Xc JJF7Md nAzhfb MdzDJe JJF7Md nAzhfb",
+        "html": "<button aria-expanded=\"false\" class=\"vNWS4-LgbsSe vNWS4-LgbsSe-OWXEXe-Bz112c-j4gsHd vNWS4-LgbsSe-OWXEXe-Bz112c-M1Soyc vNWS4-LgbsSe-OWXEXe-Bz112c-j4gsHd-J42Xof-M1Soyc vNWS4-LgbsSe-OWXEXe-SfQLQb-suEOdc vNWS4-LgbsSe-OWXEXe-dgl2Hf vNWS4-LgbsSe-OWXEXe-zcdHbf XpeoU lQq6Xc JJF7Md nAzhfb MdzDJe JJF7Md nAzhfb\" jscontroller=\"nEIPnd\" jsaction=\"click:h5M12e;clickmod:h5M12e;pointerdown:FEiYhc;pointerup:mF5Elf;pointerenter:EX0mI;pointerleave:vpvbp;pointercancel:xyn4sd;contextmenu:xexox; focus:h06R8; blur:zjh6rb;mlnRJb:fLiPzd;G2z7Ed:WLdSGd;eCCDz:uVdJ4d\" data-idom-class=\"XpeoU lQq6Xc JJF7Md nAzhfb MdzDJe JJF7"
+      }
+    ]
+  },
+  "detToggled": {
+    "result": false,
+    "why": "label says live: turn off microphone"
+  }
+}

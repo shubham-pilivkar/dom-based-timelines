@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MeetMinutes — Options</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: #0f1115;
+        color: #e7ecf3;
+        margin: 0;
+        padding: 32px;
+        max-width: 560px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 24px;
+      }
+      label {
+        display: block;
+        margin: 16px 0 4px;
+        font-size: 13px;
+        color: #8a93a3;
+      }
+      input[type="text"],
+      input[type="password"],
+      input[type="url"] {
+        width: 100%;
+        padding: 8px 10px;
+        background: #161a22;
+        border: 1px solid #232a36;
+        border-radius: 6px;
+        color: inherit;
+        font: inherit;
+      }
+      input[type="range"] {
+        width: 100%;
+      }
+      select {
+        width: 100%;
+        padding: 8px 10px;
+        background: #161a22;
+        border: 1px solid #232a36;
+        border-radius: 6px;
+        color: inherit;
+        font: inherit;
+      }
+      .row {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+      .row > label {
+        flex: 1;
+      }
+      .gain-value {
+        font-variant-numeric: tabular-nums;
+        min-width: 40px;
+        text-align: right;
+        color: #4f8cff;
+      }
+      button {
+        margin-top: 24px;
+        padding: 10px 16px;
+        border: 1px solid #4f8cff;
+        background: #4f8cff;
+        color: white;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .status {
+        margin-top: 12px;
+        font-size: 13px;
+        color: #22c55e;
+        min-height: 18px;
+      }
+      .status.error {
+        color: #ef4444;
+      }
+      small.hint {
+        color: #8a93a3;
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+      }
+      hr.section {
+        border: 0;
+        border-top: 1px solid #232a36;
+        margin: 32px 0 8px;
+      }
+      h2 {
+        font-size: 15px;
+        margin: 12px 0 0;
+        color: #e7ecf3;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 600;
+        background: #1f2937;
+        color: #9aa3b6;
+      }
+      .pill.paired { background: #14532d; color: #86efac; }
+      .pill.connecting { background: #422006; color: #fbbf24; }
+      .pill.failed { background: #4c0519; color: #fda4af; }
+      button.secondary {
+        margin-top: 0;
+        background: transparent;
+        color: #4f8cff;
+        border-color: #4f8cff;
+      }
+      .account-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 10px;
+        background: #161a22;
+        border: 1px solid #232a36;
+        border-radius: 6px;
+      }
+      .account-state {
+        font-size: 13px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .account-state.signed-out {
+        color: #8a93a3;
+      }
+      .account-state.signed-in {
+        color: #e7ecf3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>MeetMinutes — Options</h1>
+
+    <label>Account</label>
+    <div id="account-row" class="account-row">
+      <span id="account-state" class="account-state">Signed out</span>
+      <button id="signout-btn" type="button" class="secondary" style="margin-top: 0;">Sign out</button>
+    </div>
+    <small class="hint">
+      Sign in / Sign up from the toolbar popup. Sign-out clears the token
+      from chrome.storage and revokes it on the server.
+    </small>
+
+    <div class="row">
+      <label for="mic-gain">Microphone gain</label>
+      <span id="mic-gain-value" class="gain-value">1.00</span>
+    </div>
+    <input id="mic-gain" type="range" min="0" max="2" step="0.05" />
+
+    <div class="row">
+      <label for="tab-gain">Tab audio gain</label>
+      <span id="tab-gain-value" class="gain-value">1.00</span>
+    </div>
+    <input id="tab-gain" type="range" min="0" max="2" step="0.05" />
+
+    <div class="row" style="margin-top: 16px;">
+      <label for="audio-only" style="margin: 0;">Audio-only recording</label>
+      <input id="audio-only" type="checkbox" />
+    </div>
+    <small class="hint">Skip video. ~10× smaller files; transcription quality is unchanged. Recommended when you only need the transcript.</small>
+
+    <label for="capture-source">Capture source</label>
+    <select id="capture-source">
+      <option value="tab">Meeting tab (audio + video of the call tab)</option>
+      <option value="screen">Screen + system audio (pick a screen/window/tab)</option>
+    </select>
+    <small class="hint">"Screen + system audio" records what you pick in Chrome's share dialog and its system/tab audio. Tick "Share system audio" / "Share tab audio" in that dialog to capture audio (Chrome can't capture system audio without it; a shared window has no audio). DOM speaker names only work when the meeting tab itself is captured.</small>
+
+    <label for="mic-device">Microphone device</label>
+    <select id="mic-device">
+      <option value="">System default</option>
+    </select>
+    <small class="hint">Click "Refresh devices" after granting microphone permission to see device names.</small>
+    <button id="refresh-devices" type="button" style="margin-top: 8px; padding: 6px 12px; font-size: 12px;">Refresh devices</button>
+
+    <label for="video-bitrate">Video bitrate</label>
+    <select id="video-bitrate">
+      <option value="1000000">1.0 Mbps — smallest files</option>
+      <option value="1500000">1.5 Mbps — balanced (default)</option>
+      <option value="2500000">2.5 Mbps — highest quality</option>
+    </select>
+    <small class="hint">Ignored when audio-only is on. Lower bitrates dramatically reduce storage. Applied to new recordings; existing ones aren't re-encoded.</small>
+
+    <label for="audio-bitrate">Audio bitrate</label>
+    <select id="audio-bitrate">
+      <option value="96000">96 kbps — smaller files</option>
+      <option value="128000">128 kbps (default) — transparent for speech</option>
+      <option value="192000">192 kbps — archival quality</option>
+    </select>
+
+    <button id="save-btn" type="button">Save</button>
+    <div id="status" class="status"></div>
+
+    <hr class="section" />
+    <h2>Pair with MeetMinutes Desktop <span class="pill" id="bridge-status">off</span></h2>
+    <small class="hint">
+      Optional. When paired with a running MeetMinutes Desktop install, this extension
+      forwards Google Meet + Microsoft Teams speaker-change events over localhost so the
+      desktop transcript can label speakers by their real name. Off by default.
+      Events never leave your machine — the bridge is loopback-only.
+    </small>
+
+    <div class="row" style="margin-top: 16px;">
+      <label for="bridge-enabled" style="margin: 0;">Enable desktop pairing</label>
+      <input id="bridge-enabled" type="checkbox" />
+    </div>
+
+    <label for="bridge-token">Bridge token</label>
+    <input id="bridge-token" type="password" placeholder="paste from desktop Settings → Privacy → Bridge token" autocomplete="off" />
+    <small class="hint" id="bridge-error" style="color:#fda4af; display:none;"></small>
+
+    <div style="display:flex; gap:8px; margin-top: 12px;">
+      <button id="bridge-test-btn" type="button" class="secondary">Test connection</button>
+      <button id="bridge-save-btn" type="button">Save pairing</button>
+    </div>
+    <div id="bridge-status-line" class="status"></div>
+
+    <hr class="section" />
+    <h2>Privacy &amp; advanced</h2>
+    <small class="hint">
+      For details on how recordings, transcripts and telemetry are
+      handled, see our
+      <a href="https://meetminutes.in/privacy" target="_blank" rel="noopener">privacy
+      policy</a>.
+    </small>
+
+    <div class="row" style="margin-top: 16px;">
+      <label for="e2ee-enabled" style="margin: 0;">Encrypt recordings on this device</label>
+      <input id="e2ee-enabled" type="checkbox" />
+    </div>
+    <small class="hint">
+      Recording chunks are AES-256-GCM encrypted in your browser before
+      upload. The encryption key never leaves this device. Tradeoff
+      (preview release): encrypted recordings cannot be transcribed
+      yet, and losing this browser profile means losing the recording
+      — no recovery yet.
+    </small>
+
+    <div class="row" style="margin-top: 16px;">
+      <label for="webcodecs-recorder-enabled" style="margin: 0;">Use WebCodecs recorder (audio-only)</label>
+      <input id="webcodecs-recorder-enabled" type="checkbox" />
+    </div>
+    <small class="hint">
+      Experimental. Replaces MediaRecorder with a WebCodecs pipeline
+      that produces exact 20-second audio chunks. Only takes effect
+      when "Audio-only recording" is on. Off by default.
+    </small>
+
+    <button id="privacy-save-btn" type="button">Save</button>
+    <div id="privacy-status" class="status"></div>
+
+    <script type="module" src="./options.js"></script>
+  </body>
+</html>
